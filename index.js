@@ -31,6 +31,7 @@ async function run() {
     const database = client.db("FitnessHouse");
     const FeaturedCollection = database.collection("FeaturedCard");
     const classesCollection=database.collection('classes')
+    const reviewsCollection=database.collection('Reviews')
 
 
     app.get('/featured' ,async (req , res) =>{
@@ -39,6 +40,10 @@ async function run() {
     })
     app.get('/classes' ,async (req , res) =>{
         const result = await classesCollection.find().toArray();
+      res.send(result);
+    })
+    app.get('/reviews' ,async (req , res) =>{
+        const result = await reviewsCollection.find().toArray();
       res.send(result);
     })
 
