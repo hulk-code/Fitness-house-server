@@ -33,6 +33,8 @@ async function run() {
     const classesCollection=database.collection('classes')
     const reviewsCollection=database.collection('Reviews')
     const TodayBlogs=database.collection('Blogs')
+    const OurSubscriber=database.collection('Subscriber')
+
 
 
     app.get('/featured' ,async (req , res) =>{
@@ -56,6 +58,13 @@ async function run() {
       const query={_id :new ObjectId(id)}
       const result=await TodayBlogs.findOne(query)
        res.send(result)
+     })
+
+     app.post('/subscriber' , async(req ,res) =>{
+      
+      const Subscribers=req.body;
+      const result=await OurSubscriber.insertOne(Subscribers);
+      res.send(result)
      })
 
     await client.db("admin").command({ ping: 1 });
