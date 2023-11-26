@@ -38,9 +38,12 @@ async function run() {
     const  instructorprofile=database.collection('trainerPageProfile')
     const  userCollection=database.collection('users')
     const  beATrainercollection=database.collection('beATrainer')
+    const  classRoutine=database.collection('ClassesRoutine')
+    const  postCollection=database.collection('postdata')
 
 
 
+    
     app.get('/featured' ,async (req , res) =>{
         const result = await FeaturedCollection.find().toArray();
       res.send(result);
@@ -101,6 +104,38 @@ async function run() {
       const result = await beATrainercollection.insertOne(reqInfo);
       res.send(result);
     });
+    app.get('/routine' ,async (req , res) =>{
+      const result = await classRoutine.find().toArray();
+    res.send(result);
+  })
+  app.get('/routine/:id' , async(req ,res)=>{
+    const id=req.params.id;
+    const query={_id :new ObjectId(id)}
+    const result=await classRoutine.findOne(query)
+     res.send(result)
+   })
+   app.post('/routine', async (req, res) => {
+    const routineInfo = req.body;
+    const result = await classRoutine.insertOne(routineInfo);
+    res.send(result);
+  });
+
+  //pagination
+  app.get('/posts', async(req, res) => {
+    const size=parseInt(req.query.size)
+    const page=parseInt(req.query.page)
+    console.log('pagination',req.query)
+      const result = await postCollection.find()
+      .skip(page) 
+      .limit(size)
+      .toArray();
+      res.send(result);
+  })
+
+  app.get('/postsCount' ,async(req,res)=>{
+    const count=await postCollection.estimatedDocumentCount()
+    res.send({count})
+  })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
