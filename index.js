@@ -34,6 +34,9 @@ async function run() {
     const reviewsCollection=database.collection('Reviews')
     const TodayBlogs=database.collection('Blogs')
     const OurSubscriber=database.collection('Subscriber')
+    const  Trainerprofile=database.collection('Trainerprofile')
+    const  instructorprofile=database.collection('trainerPageProfile')
+    const  userCollection=database.collection('users')
 
 
 
@@ -66,6 +69,32 @@ async function run() {
       const result=await OurSubscriber.insertOne(Subscribers);
       res.send(result)
      })
+     app.get('/profile' ,async (req , res) =>{
+      const result = await Trainerprofile.find().toArray();
+    res.send(result);
+  })
+     app.get('/instructorprofile' ,async (req , res) =>{
+      const result = await instructorprofile.find().toArray();
+    res.send(result);
+  })
+  app.get('/instructorprofile/:id' , async(req ,res)=>{
+    const id=req.params.id;
+    const query={_id :new ObjectId(id)}
+    const result=await instructorprofile.findOne(query)
+     res.send(result)
+   })
+
+   app.post('/users', async (req, res) => {
+      const user = req.body;
+      
+      const query = { email: user.email }
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: 'user already exists', insertedId: null })
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
