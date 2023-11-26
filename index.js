@@ -37,6 +37,7 @@ async function run() {
     const  Trainerprofile=database.collection('Trainerprofile')
     const  instructorprofile=database.collection('trainerPageProfile')
     const  userCollection=database.collection('users')
+    const  beATrainercollection=database.collection('beATrainer')
 
 
 
@@ -93,6 +94,11 @@ async function run() {
         return res.send({ message: 'user already exists', insertedId: null })
       }
       const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+    app.post('/beatrainer', async (req, res) => {
+      const reqInfo = req.body;
+      const result = await beATrainercollection.insertOne(reqInfo);
       res.send(result);
     });
 
