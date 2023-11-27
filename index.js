@@ -215,6 +215,7 @@ async function run() {
     res.send({trainer})
     })
 
+
   app.patch('/beatrainer/trainer/:id' , verifytoken,verifyTrianer, async(req , res) =>{
     const id=req.params.id
     const filter={_id :new ObjectId(id)}
@@ -226,6 +227,12 @@ async function run() {
     const result=await beATrainercollection.updateOne(filter,updatedDoc)
     res.send(result)
    })
+   app.delete('/beatrainer/:id', verifytoken, verifyAdmin, async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) }
+    const result = await beATrainercollection.deleteOne(query);
+    res.send(result);
+  })
 
 
     app.get('/routine' ,async (req , res) =>{
