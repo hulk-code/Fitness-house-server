@@ -68,6 +68,7 @@ async function run() {
      
      }
 
+
      const verifyAdmin=async(req  , res ,next)=>{
       const email=req.decoded.email;
       const query={email : email}
@@ -78,6 +79,19 @@ async function run() {
       }
       next();
      }
+
+     const verifyTrianer=async(req  , res ,next)=>{
+      const email=req.decoded.email;
+      const query={email : email}
+      const user=await beATrainercollection.findOne(query)
+      const isTrainer=user?.role==='trainer';
+      if(isTrainer){
+        return res.status(403).send({message:"forbidden access"})
+      }
+      next();
+     }
+
+
 
     app.get('/featured' ,async (req , res) =>{
         const result = await FeaturedCollection.find().toArray();
@@ -108,6 +122,10 @@ async function run() {
       const result=await OurSubscriber.insertOne(Subscribers);
       res.send(result)
      })
+     app.get('/subscriber' , verifytoken,verifyAdmin, async(req , res) =>{
+      const result=await OurSubscriber.find().toArray()
+      res.send(result)
+     })
      app.get('/profile' ,async (req , res) =>{
       const result = await Trainerprofile.find().toArray();
     res.send(result);
@@ -128,6 +146,8 @@ async function run() {
       const result = await userCollection.find().toArray();
     res.send(result);
   })
+
+//set user role
   app.patch('/users/admin/:id' , verifytoken,verifyAdmin, async(req , res) =>{
     const id=req.params.id
     const filter={_id :new ObjectId(id)}
@@ -139,6 +159,8 @@ async function run() {
     const result=await userCollection.updateOne(filter,updatedDoc)
     res.send(result)
    })
+
+
    app.get('/users/admin/:email',verifytoken, async(req ,res) =>{
     const email=req.params.email;
     if(email !==req.decoded.email){
@@ -153,6 +175,8 @@ async function run() {
     }
     res.send({admin})
     })
+
+
    app.post('/users', async (req, res) => {
       const user = req.body;
       
@@ -170,6 +194,39 @@ async function run() {
       const result = await beATrainercollection.insertOne(reqInfo);
       res.send(result);
     });
+
+    app.get('/beatrainer' ,async (req , res) =>{
+      const result = await beATrainercollection.find().toArray();
+    res.send(result);
+  })
+
+  app.get('/beatrainer/trainer/:email',verifytoken, async(req ,res) =>{
+    const email=req.params.email;
+    if(email !==req.decoded.email){
+     return res.status(403).send({message:"unauthorize access"})
+    }
+    const query={email :email};
+    const user=await beATrainercollection.findOne(query)
+    let trainer=false;
+    if(user){
+     trainer=user?.role==="trainer";
+    
+    }
+    res.send({trainer})
+    })
+
+  app.patch('/beatrainer/trainer/:id' , verifytoken,verifyTrianer, async(req , res) =>{
+    const id=req.params.id
+    const filter={_id :new ObjectId(id)}
+    const updatedDoc={
+      $set:{
+        role:'trainer'
+      }
+    }
+    const result=await beATrainercollection.updateOne(filter,updatedDoc)
+    res.send(result)
+   })
+
 
     app.get('/routine' ,async (req , res) =>{
       const result = await classRoutine.find().toArray();
