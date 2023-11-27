@@ -264,6 +264,12 @@ async function run() {
       .toArray();
       res.send(result);
   })
+  app.post('/posts', async (req, res) => {
+    const postInfo = req.body;
+    const result = await postCollection.insertOne(postInfo);
+    res.send(result);
+  });
+
 
   app.get('/postsCount' ,async(req,res)=>{
     const count=await postCollection.estimatedDocumentCount()
