@@ -41,6 +41,7 @@ async function run() {
     const  beATrainercollection=database.collection('beATrainer')
     const  classRoutine=database.collection('ClassesRoutine')
     const  postCollection=database.collection('postdata')
+    const  recommendedClass=database.collection('recommendedclass')
 
 
 
@@ -147,6 +148,9 @@ async function run() {
     res.send(result);
   })
 
+   
+
+
 //set user role
   app.patch('/users/admin/:id' , verifytoken,verifyAdmin, async(req , res) =>{
     const id=req.params.id
@@ -188,6 +192,7 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
+
 
     app.post('/beatrainer', async (req, res) => {
       const reqInfo = req.body;
@@ -275,6 +280,11 @@ async function run() {
     const count=await postCollection.estimatedDocumentCount()
     res.send({count})
   })
+
+  app.get('/recommended' ,async (req , res) =>{
+    const result = await recommendedClass.find().toArray();
+  res.send(result);
+})
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
