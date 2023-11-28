@@ -142,13 +142,36 @@ async function run() {
      res.send(result)
    })
 
-   app.get('/users' , verifytoken,verifyAdmin, async (req , res) =>{
+   app.get('/users' , verifytoken, async (req , res) =>{
     console.log(req.headers);
       const result = await userCollection.find().toArray();
     res.send(result);
   })
 
-   
+  app.get('/users/:email' ,  async (req , res) =>{
+    const email=req.params.email
+    const query={email :email}
+   const result = await userCollection.findOne(query)
+ res.send(result);
+})
+// app.get('/users/:id' , async(req ,res)=>{
+//   const id=req.params.id;
+//   const query={_id :new ObjectId(id)}
+//   const result=await userCollection.findOne(query)
+//    res.send(result)
+//  })
+
+// app.patch('/users/:id' , verifytoken, async(req , res) =>{
+//   const id=req.params.id
+//   const filter={_id :new ObjectId(id)}
+//   const updatedDoc={
+//     $set:{
+//       name:name
+//     }
+//   }
+//   const result=await userCollection.updateOne(filter,updatedDoc)
+//   res.send(result)
+//  })
 
 
 //set user role
