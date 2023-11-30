@@ -3,6 +3,7 @@ const cors=require('cors')
 const app = express()
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -36,13 +37,17 @@ async function run() {
     const TodayBlogs=database.collection('Blogs')
     const OurSubscriber=database.collection('Subscriber')
     const  Trainerprofile=database.collection('Trainerprofile')
-    const  instructorprofile=database.collection('trainerPageProfile')
+    const  instructorprofile=database.collection('trainerslot')
     const  userCollection=database.collection('users')
     const  beATrainercollection=database.collection('beATrainer')
     const  classRoutine=database.collection('ClassesRoutine')
     const  postCollection=database.collection('postdata')
     const  recommendedClass=database.collection('recommendedclass')
-
+    const  bookingSlot=database.collection('bookings')
+    const  premimuCollection=database.collection('premiumPlan')
+    const paymentCollection = database.collection("payment");
+    const selectClassCollection = database.collection('selectedclasses');
+    
 
 
     app.post('/jwt', async(req , res) =>{
@@ -161,17 +166,30 @@ async function run() {
 //    res.send(result)
 //  })
 
-// app.patch('/users/:id' , verifytoken, async(req , res) =>{
-//   const id=req.params.id
-//   const filter={_id :new ObjectId(id)}
-//   const updatedDoc={
-//     $set:{
-//       name:name
-//     }
-//   }
-//   const result=await userCollection.updateOne(filter,updatedDoc)
-//   res.send(result)
-//  })
+app.put('/users/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+
+  // Assuming the new name is sent in the request body
+  const { newName } = req.body;
+
+  const updatedDoc = {
+    $set: {
+      name: newName,
+    },
+  };
+
+  const options = { upsert: true };
+
+  try {
+    const result = await userCollection.updateOne(filter, updatedDoc, options);
+    res.send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 
 //set user role
@@ -306,6 +324,60 @@ async function run() {
 
   app.get('/recommended' ,async (req , res) =>{
     const result = await recommendedClass.find().toArray();
+  res.send(result);
+})
+
+app.get('/premimu',async (req , res) =>{
+  const result = await premimuCollection.find().toArray();
+  res.send(result);
+})
+
+
+app.post('/bookings' , async(req ,res) =>{
+      
+  const Subscribers=req.body;
+  const result=await bookingSlot.insertOne(Subscribers);
+  res.send(result)
+ })
+ app.get('/bookings',async (req , res) =>{
+  const result = await bookingSlot.find().toArray();
+  res.send(result);
+})
+app.get('/bookings/:email' ,  async (req , res) =>{
+  const email=req.params.email
+  console.log(email);
+  const query={userEmail :email}
+  console.log(query);
+ const result = await bookingSlot.find(query).toArray()
+res.send(result);
+})
+
+//payment 
+
+app.post('/create-payment-intent',async(req, res)=>{
+  const {price} = req.body;
+  const amount = price*100;
+  console.log(price, amount);
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amount,
+    currency:'usd',
+    payment_method_types: ['card']
+  });
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  })
+})
+// app.post('/payments', async(req, res)=>{
+//   const payment = req.body;
+//   const insertResult = await paymentCollection.insertOne(payment);
+
+//   const query = {_id: {$in: payment._id = new ObjectId(id)}}
+//   const deleteResult = await selectClassCollection.deleteOne(query)
+//   res.send({ insertResult,deleteResult})
+// })
+
+app.get('/payment',async(req,res)=>{
+  const result = await paymentCollection.find().toArray();
   res.send(result);
 })
 
